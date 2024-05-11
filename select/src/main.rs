@@ -65,7 +65,7 @@ pub fn select() -> i32 {
                 if len != 0 {
                     println!("Read: {}", String::from_utf8_lossy(&buf[0..len as usize]))
                 } else {
-                    print!("Nothing read.");
+                    println!("Nothing read.");
                 }
                 0
             }

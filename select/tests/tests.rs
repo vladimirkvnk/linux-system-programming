@@ -7,13 +7,10 @@ mod e2e {
     #[test]
     fn timeout() {
         let output = Command::new(BINARY_PATH)
-            .stdin(Stdio::inherit())
+            .stdin(Stdio::null())
             .output()
             .expect("Failed to execute command");
 
-        assert_eq!(
-            String::from_utf8_lossy(&output.stdout),
-            "3 seconds elapsed.\n"
-        );
+        assert_eq!(String::from_utf8_lossy(&output.stdout), "Nothing read.\n");
     }
 }
