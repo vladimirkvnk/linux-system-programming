@@ -3,7 +3,16 @@ use std::{ffi::CString, process};
 use libc::{c_void, fd_set, perror, read, timeval, FD_ISSET, FD_SET, FD_ZERO, STDIN_FILENO};
 
 fn main() {
-    process::exit(select());
+    #[cfg(unix)]
+    {
+        process::exit(select());
+    }
+
+    #[cfg(not(unix))]
+    {
+        println!("This program is intended to run on Unix systems only.");
+        process::exit(-1);
+    }
 }
 
 pub fn select() -> i32 {

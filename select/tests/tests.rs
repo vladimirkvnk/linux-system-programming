@@ -1,4 +1,5 @@
 #[cfg(test)]
+#[cfg(unix)]
 mod e2e {
     use std::{
         io::Write,
