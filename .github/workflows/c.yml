@@ -1,0 +1,22 @@
+name: C
+
+on:
+  push:
+    branches: ["master"]
+  pull_request:
+    branches: ["master"]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./c
+
+    steps:
+      - uses: johelegp/gcc-snapshot@v1
+      - uses: actions/checkout@v4
+      - name: Build
+        run: make
+      - name: Run tests
+        run: make test
