@@ -1,11 +1,5 @@
 name: Rust
 
-# defaults:
-#   run:
-#     # GitHub Actions run without a TTY device. This is a workaround to get one,
-#     # based on https://github.com/actions/runner/issues/241#issuecomment-2019042651
-#     shell: 'script --return --quiet --log-out /dev/null --command "bash -e {0}"'
-
 on:
   push:
     branches: ["master"]
@@ -19,6 +13,9 @@ env:
 jobs:
   build:
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./rust
 
     steps:
       - uses: actions/checkout@v4
