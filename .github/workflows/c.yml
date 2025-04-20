@@ -15,7 +15,6 @@ jobs:
 
         steps:
             - uses: actions/checkout@v4
-            - uses: johelegp/gcc-snapshot@v1
             - name: Install GCC Snapshot
               uses: johelegp/gcc-snapshot@v1
               with:
