@@ -35,7 +35,7 @@ func TestMainBehavior(t *testing.T) {
 					return nil, err
 				}
 				_, err = w.WriteString("test input\n")
-				w.Close()
+				_ = w.Close()
 				return r, err
 			},
 			expectedOutput: "Read: test input",
@@ -49,7 +49,7 @@ func TestMainBehavior(t *testing.T) {
 				if err != nil {
 					return nil, err
 				}
-				w.Close() // Close write end to signal EOF
+				_ = w.Close() // Close write end to signal EOF
 				return r, nil
 			},
 			expectedOutput: "Nothing read",
@@ -60,14 +60,16 @@ func TestMainBehavior(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			// Set very short timeout for tests
-			os.Setenv("SELECT_TIMEOUT", "1")
+			_ = os.Setenv("SELECT_TIMEOUT", "1")
 
 			// Create stdin
 			stdin, err := tt.prepareStdin()
 			if err != nil {
 				t.Fatalf("Failed to prepare stdin: %v", err)
 			}
-			defer stdin.Close()
+			defer func() {
+				_ = stdin.Close()
+			}()
 
 			// Create stdout capture
 			stdout := &bytes.Buffer{}
@@ -93,7 +95,7 @@ func TestMainBehavior(t *testing.T) {
 
 			select {
 			case <-time.After(tt.timeout):
-				cmd.Process.Kill()
+				_ = cmd.Process.Kill()
 				t.Fatalf("Test timed out after %v", tt.timeout)
 			case err := <-done:
 				if err != nil {

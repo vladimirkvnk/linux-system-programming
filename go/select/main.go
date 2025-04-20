@@ -24,8 +24,12 @@ func main() {
 	stdinFd := int(os.Stdin.Fd())
 
 	// Set stdin to non-blocking mode
-	unix.SetNonblock(stdinFd, true)
-	defer unix.SetNonblock(stdinFd, false)
+	if err := unix.SetNonblock(stdinFd, true); err != nil {
+		log.Printf("failed to set stdin to non blocking mode")
+	}
+	defer func() {
+		_ = unix.SetNonblock(stdinFd, false)
+	}()
 
 	readfs := unix.FdSet{}
 	readfs.Zero()
