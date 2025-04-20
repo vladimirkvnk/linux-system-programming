@@ -33,7 +33,7 @@ jobs:
                   find . -name go.mod -not -path "./go.mod" | while read modfile; do
                     dir=$(dirname "$modfile")
                     echo "🛠️ Linting $dir"
-                    (cd "$dir" && golangci-lint run --out-format=github-actions ./...)
+                    (cd "$dir" && golangci-lint run ./...)
                   done
 
             - name: Run tests
