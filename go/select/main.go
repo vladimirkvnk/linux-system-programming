@@ -15,20 +15,28 @@ const (
 )
 
 func main() {
-	// Get timeout from env vars
+	// Get timeout from environment for testing
 	timeoutSec := defaultTimeout
 	if val, err := strconv.Atoi(os.Getenv("SELECT_TIMEOUT")); err == nil && val > 0 {
 		timeoutSec = val
 	}
 
+	// Check for CI environment - use a shorter timeout
+	if os.Getenv("CI") == "true" {
+		timeoutSec = 1 // Always use 1 second in CI
+	}
+
 	stdinFd := int(os.Stdin.Fd())
 
-	// Set stdin to non-blocking mode
+	// Set stdin to non-blocking mode for testing
 	if err := unix.SetNonblock(stdinFd, true); err != nil {
-		log.Printf("failed to set stdin to non blocking mode")
+		log.Printf("Failed to set non-blocking mode: %v", err)
+		return
 	}
 	defer func() {
-		_ = unix.SetNonblock(stdinFd, false)
+		if err := unix.SetNonblock(stdinFd, false); err != nil {
+			log.Printf("Failed to restore blocking mode: %v", err)
+		}
 	}()
 
 	readfs := unix.FdSet{}
@@ -66,7 +74,8 @@ func main() {
 		return
 	}
 
-	if _, err := fmt.Printf("Read: %s", string(buf[:len])); err != nil {
+	str := string(buf[:len])
+	if _, err := fmt.Printf("Read: %s", str); err != nil {
 		log.Printf("Print error: %v", err)
 	}
 }
