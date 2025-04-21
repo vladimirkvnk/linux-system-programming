@@ -3,79 +3,51 @@ package main
 import (
 	"fmt"
 	"log"
-	"os"
-	"strconv"
 
 	"golang.org/x/sys/unix"
 )
 
 const (
-	defaultTimeout = 1 // seconds
-	bufLen         = 1024
+	defaultTimeoutSec = 3
+	bufLen            = 1024
 )
 
 func main() {
-	// Get timeout from environment for testing
-	timeoutSec := defaultTimeout
-	if val, err := strconv.Atoi(os.Getenv("SELECT_TIMEOUT")); err == nil && val > 0 {
-		timeoutSec = val
-	}
-
-	// Check for CI environment - use a shorter timeout
-	if os.Getenv("CI") == "true" {
-		timeoutSec = 1 // Always use 1 second in CI
-	}
-
-	stdinFd := int(os.Stdin.Fd())
-
-	// Set stdin to non-blocking mode for testing
-	if err := unix.SetNonblock(stdinFd, true); err != nil {
-		log.Printf("Failed to set non-blocking mode: %v", err)
-		return
-	}
-	defer func() {
-		if err := unix.SetNonblock(stdinFd, false); err != nil {
-			log.Printf("Failed to restore blocking mode: %v", err)
-		}
-	}()
-
 	readfs := unix.FdSet{}
 	readfs.Zero()
-	readfs.Set(stdinFd)
+	readfs.Set(unix.Stdin)
 
 	timeVal := unix.Timeval{
-		Sec:  int64(timeoutSec),
-		Usec: 0,
+		Sec: defaultTimeoutSec,
 	}
 
-	res, err := unix.Select(stdinFd+1, &readfs, nil, nil, &timeVal)
+	result, err := unix.Select(unix.Stdin+1, &readfs, nil, nil, &timeVal)
 	if err != nil {
-		log.Printf("Select error: %v", err)
-		return
+		log.Fatalf("select error: %v", err)
 	}
-	if res == 0 {
-		fmt.Printf("Timeout hit. %d seconds elapsed.\n", timeoutSec)
+
+	if result == 0 {
+		fmt.Println("hit timeout")
 		return
 	}
 
-	if !readfs.IsSet(stdinFd) {
-		log.Println("Unexpected state: stdin not ready")
-		return
+	if !readfs.IsSet(unix.Stdin) {
+		fmt.Println("this should never happen!")
 	}
 
 	buf := make([]uint8, bufLen)
-	len, err := unix.Read(stdinFd, buf)
+
+	len, err := unix.Read(unix.Stdin, buf)
 	if err != nil {
-		log.Printf("Read error: %v", err)
-		return
+		log.Fatalf("read from stdin: %v", err)
 	}
+
 	if len == 0 {
-		fmt.Println("Nothing read")
+		fmt.Println("nothing read")
 		return
 	}
 
-	str := string(buf[:len])
-	if _, err := fmt.Printf("Read: %s", str); err != nil {
-		log.Printf("Print error: %v", err)
+	if _, err := fmt.Printf("read: %s\n", string(buf[0:len])); err != nil {
+		log.Fatalf("failed to convert bytes to string after read: %b", buf[0:len])
 	}
 }
