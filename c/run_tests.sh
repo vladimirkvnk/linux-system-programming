@@ -1,5 +1,7 @@
 #!/bin/sh
 
+result="failed"
+
 # Function to run a test and compare output
 run_test() {
     test_name=$1
@@ -9,14 +11,20 @@ run_test() {
     # Capture the output of the executable
     output=$(eval "$command")
 
+    result="failed"
+
     # Compare the output with the expected value
-    message="Test $command: $test_name"
+    message="Test $test_name"
     if [ "$output" = "$expected_output" ]; then
-        echo "$message: Test passed"
+        echo "$message: passed"
+        result="passed"
     else
-        echo "$message: Test failed"
-        echo "Expected: '$expected_output'"
-        echo "Got: '$output'"
+        echo "$message: failed"
+        echo ""
+        echo "-->Expected: '$expected_output'"
+        echo "-->Got: '$output'"
+        echo ""
+        result="failed"
     fi
 }
 
@@ -24,3 +32,11 @@ run_test() {
 run_test "STDOUT should be writable" "./poll" "stdout is writeable"
 run_test "STDOUT should be writable, STDIN readable" "./poll < $0" "stdin is readable
 stdout is writeable"
+
+# Test select
+run_test "STDIN is readable with no data" "./select < /dev/null" "nothing read"
+run_test "STDIN is readable, read some data" "echo 'some data' | ./select" "read: some data"
+
+echo "**********************"
+echo "-->>Result: $result<<--"
+echo "**********************"
