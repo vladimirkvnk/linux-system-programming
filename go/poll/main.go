@@ -7,7 +7,7 @@ import (
 	"golang.org/x/sys/unix"
 )
 
-const timeoutSec = 5
+const timeoutSec = 2
 
 func main() {
 	fds := []unix.PollFd{
