@@ -11,8 +11,6 @@ run_test() {
     # Capture the output of the executable
     output=$(eval "$command")
 
-    result="failed"
-
     # Compare the output with the expected value
     message="Test $test_name"
     if [ "$output" = "$expected_output" ]; then
