@@ -45,7 +45,9 @@ func TestReadString(t *testing.T) {
 		t.Fatalf("failed to write to stdin: %v", err)
 	}
 
-	_ = cmd.Start()
+	if err := cmd.Start(); err != nil {
+		t.Fatalf("failed to start command: %v", err)
+	}
 
 	buf := make([]uint8, 256)
 
