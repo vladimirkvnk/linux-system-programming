@@ -1,7 +1,7 @@
 #[cfg(test)]
 #[cfg(unix)]
 mod e2e {
-    use std::process::{Command, Stdio};
+    use std::process::Command;
 
     const BINARY_PATH: &str = "./../target/debug/mmap";
 

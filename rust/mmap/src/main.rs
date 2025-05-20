@@ -3,6 +3,7 @@ use std::fs::File;
 use std::io::Result;
 use std::os::fd::AsRawFd;
 use std::os::unix::fs::MetadataExt;
+use std::ptr::null_mut;
 use std::slice;
 
 fn main() -> Result<()> {
@@ -22,7 +23,7 @@ fn main() -> Result<()> {
 
     let data_ptr = unsafe {
         libc::mmap(
-            0 as *mut libc::c_void,
+            null_mut::<libc::c_void>(),
             metadata.size() as libc::size_t,
             libc::PROT_READ,
             libc::MAP_SHARED,
@@ -42,12 +43,7 @@ fn main() -> Result<()> {
         print!("{}", *byte as char);
     }
 
-    let munmap_result = unsafe {
-        libc::munmap(
-            data_ptr as *mut libc::c_void,
-            metadata.size() as libc::size_t,
-        )
-    };
+    let munmap_result = unsafe { libc::munmap(data_ptr, metadata.size() as libc::size_t) };
     if munmap_result == -1 {
         panic!("munmap failed");
     }
