@@ -1,7 +1,9 @@
-go 1.24.2
+go 1.26.4
 
 use ./poll
 
 use ./select
 
 use ./mmap
+
+use ./epoll
